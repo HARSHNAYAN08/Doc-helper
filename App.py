@@ -7,6 +7,10 @@ from modules.process_data import extract_text_with_page_numbers, process_text_wi
 from utilities.utils import setup_logger
 import os
 
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 # Setup logger
 Logger = setup_logger(logger_file="app")
 
