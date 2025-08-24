@@ -6,7 +6,7 @@ from langchain_community.callbacks.manager import get_openai_callback
 from modules.process_data import extract_text_with_page_numbers, process_text_with_splitter
 from utilities.utils import setup_logger
 import os
-
+import asyncio 
 try:
     asyncio.get_running_loop()
 except RuntimeError:
