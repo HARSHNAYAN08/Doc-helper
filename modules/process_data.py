@@ -1,6 +1,6 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings  # Changed from OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 from utilities.utils import setup_logger
 from typing import IO, Dict, Tuple, List
 import pymupdf
@@ -37,9 +37,9 @@ def extract_text_with_page_numbers(pdf_file: IO[bytes]) -> Tuple[str, Dict[int, 
     
     return full_text, page_texts
 
-def process_text_with_splitter(text: str, page_numbers: List[int]) -> FAISS:
+def process_text_with_splitter(text: str, page_numbers: List[int]) -> Chroma:
     """
-    Process text using RecursiveCharacterTextSplitter and create FAISS knowledge base.
+    Process text using RecursiveCharacterTextSplitter and create Chroma knowledge base.
     """
     text_splitter = RecursiveCharacterTextSplitter(
         separators=["\n\n", "\n", ".", " ", ""],
@@ -58,7 +58,8 @@ def process_text_with_splitter(text: str, page_numbers: List[int]) -> FAISS:
         google_api_key="AIzaSyBQqWQEtnl030ru0mvbO9RZegzp3FwGNsI"
     )
     
-    knowledgeBase = FAISS.from_texts(chunks, embeddings)
+    # Use Chroma instead of FAISS
+    knowledgeBase = Chroma.from_texts(chunks, embeddings)
     Logger.info("Knowledge base created from text chunks.")
     
     # Store the chunks with their corresponding page numbers
