@@ -7,14 +7,18 @@ from modules.process_data import extract_text_with_page_numbers, process_text_wi
 from utilities.utils import setup_logger
 import os
 import asyncio 
+
+# Ensure event loop setup for async tasks
 try:
     asyncio.get_running_loop()
 except RuntimeError:
     asyncio.set_event_loop(asyncio.new_event_loop())
+
 # Setup logger
 Logger = setup_logger(logger_file="app")
 
-# Set Google API key environment variable
+# 🔑 Set Google API key environment variable
+# (Better: use Streamlit secrets instead of hardcoding)
 os.environ["GOOGLE_API_KEY"] = "AIzaSyBQqWQEtnl030ru0mvbO9RZegzp3FwGNsI"
 
 def load_css(file_path: str) -> None:
@@ -49,7 +53,7 @@ def main() -> None:
         llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",
             temperature=0.7,
-            google_api_key="AIzaSyBQqWQEtnl030ru0mvbO9RZegzp3FwGNsI"
+            google_api_key=os.environ["GOOGLE_API_KEY"]
         )
     except Exception as e:
         st.error(f"Failed to initialize Gemini API: {str(e)}")
@@ -76,7 +80,7 @@ def main() -> None:
                     st.error("Could not extract text from the PDF.")
                     return
                 
-                # Process text with splitter
+                # Process text with splitter (returns FAISS vectorstore)
                 docs = process_text_with_splitter(text_data, list(page_numbers.keys()))
                 
                 if not docs:
@@ -88,7 +92,10 @@ def main() -> None:
                 
                 # Generate answer
                 with get_openai_callback() as cb:
-                    response = chain.run(input_documents=docs.similarity_search(user_question, k=5), question=user_question)
+                    response = chain.run(
+                        input_documents=docs.similarity_search(user_question, k=5),
+                        question=user_question
+                    )
                     
                     # Display results
                     st.success("Answer generated successfully!")
@@ -96,7 +103,7 @@ def main() -> None:
                     with st.expander("📄 **Answer**", expanded=True):
                         st.write(response)
                     
-                    st.info(f"✅ Document processed successfully")
+                    st.info("✅ Document processed successfully")
                         
             except Exception as e:
                 st.error(f"❌ An error occurred while processing: {str(e)}")
